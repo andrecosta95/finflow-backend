@@ -26,3 +26,28 @@ logs/
 
 # Cobertura de testes
 reports/
+
+# Compiled class file
+*.class
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs
+hs_err_pid*
+replay_pid*
+
+# Kotlin Gradle plugin data
+.kotlin/
