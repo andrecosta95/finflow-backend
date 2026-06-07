@@ -1,0 +1,72 @@
+spring:
+  application:
+    name: finflow-backend
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/finflow}
+    username: ${DB_USER:finflow}
+    password: ${DB_PASSWORD:finflow123}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: openid,profile,email
+          facebook:
+            client-id: ${FACEBOOK_CLIENT_ID}
+            client-secret: ${FACEBOOK_CLIENT_SECRET}
+            scope: public_profile,email
+        provider:
+          facebook:
+            authorization-uri: https://www.facebook.com/v18.0/dialog/oauth
+            token-uri: https://graph.facebook.com/v18.0/oauth/access_token
+            user-info-uri: https://graph.facebook.com/me?fields=id,name,email,picture
+            user-name-attribute: id
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    private-key: ${JWT_PRIVATE_KEY}
+    public-key: ${JWT_PUBLIC_KEY}
+    access-token-expiration: 900        # 15 minutos em segundos
+    refresh-token-expiration: 2592000   # 30 dias em segundos
+
+  aws:
+    region: ${AWS_REGION:us-east-1}
+    s3:
+      bucket: ${S3_BUCKET:finflow-documents}
+      endpoint: ${S3_ENDPOINT:}          # MinIO local: http://localhost:9000
+    bedrock:
+      model-id: anthropic.claude-haiku-20240307-v1:0
+
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:5173}
+
+logging:
+  level:
+    br.com.finflow: DEBUG
+    org.springframework.security: INFO

@@ -1,0 +1,45 @@
+# Perfil local — substitui variáveis de ambiente com valores de dev
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/finflow
+    username: finflow
+    password: finflow123
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # Credenciais reais do Google Console: https://console.cloud.google.com
+  # Para dev: substitua pelos seus Client ID e Secret do projeto OAuth
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:dev-placeholder-google-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:dev-placeholder-google-secret}
+          facebook:
+            client-id: ${FACEBOOK_CLIENT_ID:dev-placeholder-fb-id}
+            client-secret: ${FACEBOOK_CLIENT_SECRET:dev-placeholder-fb-secret}
+
+app:
+  jwt:
+    # Chaves geradas para dev — NUNCA commitar chaves de produção
+    private-key: classpath:keys/dev-private.pem
+    public-key: classpath:keys/dev-public.pem
+
+  aws:
+    s3:
+      endpoint: http://localhost:9000   # MinIO
+      access-key: minioadmin            # Credenciais padrão do MinIO local
+      secret-key: minioadmin
+    region: us-east-1
+
+  frontend:
+    url: http://localhost:5173
+
+logging:
+  level:
+    br.com.finflow: DEBUG
+    org.springframework.security: DEBUG

@@ -1,0 +1,84 @@
+version: "3.9"
+
+services:
+
+  # ──────────────────────────────────────────────
+  # PostgreSQL — banco de dados principal
+  # Substitui RDS em desenvolvimento local
+  # ──────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: finflow-postgres
+    environment:
+      POSTGRES_DB: finflow
+      POSTGRES_USER: finflow
+      POSTGRES_PASSWORD: finflow123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ──────────────────────────────────────────────
+  # MinIO — S3-compatible para armazenar PDFs
+  # Substitui AWS S3 em desenvolvimento local
+  # Console web: http://localhost:9001
+  # Usuário: minioadmin | Senha: minioadmin123
+  # ──────────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: finflow-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    ports:
+      - "9000:9000"   # API S3
+      - "9001:9001"   # Console web
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # ──────────────────────────────────────────────
+  # Redis — cache de categorias e tokens revogados
+  # TTL padrão: 5 minutos (alinhado com TanStack Query)
+  # ──────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: finflow-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  # ──────────────────────────────────────────────
+  # MinIO Client — cria o bucket automaticamente
+  # ao subir o ambiente pela primeira vez
+  # ──────────────────────────────────────────────
+  minio-setup:
+    image: minio/mc:latest
+    container_name: finflow-minio-setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 minioadmin minioadmin123;
+        mc mb --ignore-existing local/finflow-documents;
+        mc anonymous set none local/finflow-documents;
+        echo 'Bucket finflow-documents criado com sucesso';
+      "
+
+volumes:
+  postgres_data:
+  minio_data:
+  redis_data:

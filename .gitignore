@@ -1,0 +1,28 @@
+# Build
+build/
+.gradle/
+out/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Chaves RSA de desenvolvimento — NUNCA commitar
+src/main/resources/keys/
+
+# Variáveis de ambiente locais
+.env
+.env.local
+*.env
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Cobertura de testes
+reports/
