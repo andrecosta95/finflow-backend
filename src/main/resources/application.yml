@@ -65,7 +65,8 @@ app:
       bucket: ${S3_BUCKET:finflow-documents}
       endpoint: ${S3_ENDPOINT:}          # MinIO local: http://localhost:9000
     bedrock:
-      model-id: anthropic.claude-haiku-20240307-v1:0
+      model-id: anthropic.claude-3-haiku-20240307-v1:0
+      enabled: ${BEDROCK_ENABLED:true}
 
   frontend:
     url: ${FRONTEND_URL:http://localhost:5173}

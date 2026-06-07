@@ -89,14 +89,10 @@ class CategorizationService(
             .filter { it.length >= 4 && it !in stopWords }
             .take(2)
 
-        val user = category.user ?: return  // Não aprende de categorias do sistema sem usuário
-        // Usa o user da transação
+        category.user ?: return  // Não aprende de categorias do sistema sem usuário
         val existingRules = keywordRuleRepository.findByUserId(userId).map { it.keyword }
-        keywords
-            .filter { it !in existingRules }
-            .forEach { keyword ->
-                // A implementação real precisaria do User — simplificado aqui
-            }
+        // TODO Sprint 6: persistir KeywordRule com user + keyword para aprendizado automático
+        val _ = keywords.filter { it !in existingRules }
     }
 
     private fun applyKeywordRules(description: String, rules: List<KeywordRule>): Category? {

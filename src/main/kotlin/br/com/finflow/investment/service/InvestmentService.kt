@@ -2,12 +2,14 @@ package br.com.finflow.investment.service
 
 import br.com.finflow.auth.repository.UserRepository
 import br.com.finflow.document.model.Document
+import br.com.finflow.document.parser.RawInvestment
 import br.com.finflow.investment.model.InvestmentProduct
 import br.com.finflow.investment.parser.InvestmentParser
 import br.com.finflow.investment.repository.InvestmentRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
@@ -39,6 +41,32 @@ class InvestmentService(
             )
         }
 
+        return investmentRepository.saveAll(products)
+    }
+
+    /**
+     * Salva produtos de investimento extraídos de uma imagem pelo ImageAnalysisService.
+     * Usado quando o upload é IMAGE (captura de tela de app bancário).
+     */
+    @Transactional
+    fun saveFromImageData(document: Document, rawInvestments: List<RawInvestment>): List<InvestmentProduct> {
+        val products = rawInvestments.map { raw ->
+            val productType = runCatching {
+                InvestmentProduct.ProductType.valueOf(raw.productType)
+            }.getOrDefault(InvestmentProduct.ProductType.OTHER)
+
+            InvestmentProduct(
+                user = document.user,
+                document = document,
+                bank = raw.bank ?: "Desconhecido",
+                productName = raw.productName,
+                productType = productType,
+                currentBalance = BigDecimal.valueOf(raw.currentBalance),
+                investedAmount = null,
+                profitabilityPct = raw.profitabilityPct?.let { BigDecimal.valueOf(it) },
+                referenceDate = LocalDate.now()
+            )
+        }
         return investmentRepository.saveAll(products)
     }
 
