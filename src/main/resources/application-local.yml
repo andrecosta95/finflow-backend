@@ -32,8 +32,8 @@ app:
   aws:
     s3:
       endpoint: http://localhost:9000   # MinIO
-      access-key: minioadmin            # Credenciais padrão do MinIO local
-      secret-key: minioadmin
+      access-key: minioadmin
+      secret-key: minioadmin123
     region: us-east-1
 
   frontend:

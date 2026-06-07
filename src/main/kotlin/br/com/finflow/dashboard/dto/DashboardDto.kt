@@ -1,7 +1,6 @@
 package br.com.finflow.dashboard.dto
 
 import java.math.BigDecimal
-import java.time.LocalDate
 
 data class DashboardSummaryDto(
     val period: PeriodDto,
@@ -12,7 +11,8 @@ data class DashboardSummaryDto(
     val monthlyTrend: List<MonthlyTrendDto>
 )
 
-data class PeriodDto(val start: LocalDate, val end: LocalDate)
+// Strings ISO (yyyy-MM-dd) — evita dependência de JavaTimeModule no ObjectMapper
+data class PeriodDto(val start: String, val end: String)
 
 data class CategoryBreakdownDto(
     val categoryId: String?,

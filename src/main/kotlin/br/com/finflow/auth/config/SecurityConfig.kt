@@ -1,6 +1,7 @@
 package br.com.finflow.auth.config
 
 import br.com.finflow.auth.service.OAuth2UserService
+import jakarta.servlet.DispatcherType
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -36,12 +37,15 @@ class SecurityConfig(
 
             .authorizeHttpRequests { auth ->
                 auth
+                    // Dispatch de erro (Tomcat re-despacha para /error internamente)
+                    .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                     // Rotas públicas
                     .requestMatchers(
                         "/api/auth/**",
                         "/oauth2/**",
                         "/login/**",
                         "/dev/**",
+                        "/error",
                         "/actuator/health",
                         "/v3/api-docs/**",
                         "/swagger-ui/**"

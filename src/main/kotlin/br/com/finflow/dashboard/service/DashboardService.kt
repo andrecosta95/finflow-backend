@@ -38,7 +38,7 @@ class DashboardService(
             .sumOf { it.amount }
 
         return DashboardSummaryDto(
-            period = PeriodDto(start, end),
+            period = PeriodDto(start.toString(), end.toString()),
             totalIncome = totalIncome,
             totalExpenses = totalExpenses,
             netBalance = totalIncome - totalExpenses,

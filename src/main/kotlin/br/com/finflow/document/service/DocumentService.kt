@@ -5,8 +5,11 @@ import br.com.finflow.auth.repository.UserRepository
 import br.com.finflow.document.model.Document
 import br.com.finflow.document.parser.DocumentParser
 import br.com.finflow.document.repository.DocumentRepository
+import br.com.finflow.investment.parser.InvestmentParser
+import br.com.finflow.investment.service.InvestmentService
 import br.com.finflow.transaction.model.Transaction
 import br.com.finflow.transaction.repository.TransactionRepository
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
@@ -18,7 +21,9 @@ class DocumentService(
     private val documentRepository: DocumentRepository,
     private val transactionRepository: TransactionRepository,
     private val storageService: StorageService,
-    private val parsers: List<DocumentParser>,   // Spring injeta todos os parsers automaticamente
+    private val parsers: List<DocumentParser>,
+    private val investmentParsers: List<InvestmentParser>,
+    @Lazy private val investmentService: InvestmentService,
     private val userRepository: UserRepository
 ) {
 
@@ -58,6 +63,31 @@ class DocumentService(
     fun processDocument(document: Document, bytes: ByteArray) {
         document.status = Document.Status.PROCESSING
         documentRepository.save(document)
+
+        // Verifica se é documento de investimentos antes de tentar parsear transações
+        val bankHint = document.fileName.lowercase().let { name ->
+            when {
+                name.contains("itau") || name.contains("itaú") -> "itau"
+                name.contains("bradesco") -> "bradesco"
+                name.contains("nubank") -> "nubank"
+                else -> ""
+            }
+        }
+        val investmentParser = investmentParsers.firstOrNull {
+            it.supports(bankHint, document.fileName)
+        }
+        if (investmentParser != null) {
+            runCatching {
+                investmentService.parseAndSave(document, bytes, bankHint)
+                document.status = Document.Status.DONE
+                document.parsedAt = Instant.now()
+            }.onFailure { ex ->
+                document.status = Document.Status.ERROR
+                document.errorMessage = ex.message?.take(500)
+            }
+            documentRepository.save(document)
+            return
+        }
 
         runCatching {
             val parser = parsers.firstOrNull {

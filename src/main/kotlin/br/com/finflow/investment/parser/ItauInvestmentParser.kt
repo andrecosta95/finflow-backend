@@ -28,10 +28,13 @@ class ItauInvestmentParser : InvestmentParser {
     )
     private val datePattern = Regex("""(\d{2}/\d{2}/\d{4})""")
 
-    override fun supports(bank: String, fileName: String): Boolean =
-        bank.contains("itau", ignoreCase = true) ||
-        fileName.contains("itau", ignoreCase = true) ||
-        fileName.contains("ion", ignoreCase = true)
+    override fun supports(bank: String, fileName: String): Boolean {
+        val name = fileName.lowercase()
+        val isItau = bank.contains("itau", ignoreCase = true) || name.contains("itau")
+        val isInvestmentFile = name.contains("investimento") || name.contains("carteira") ||
+            name.contains("portfolio") || name.contains("ion")
+        return isItau && isInvestmentFile
+    }
 
     override fun parse(bytes: ByteArray): List<ParsedInvestment> {
         val text = Loader.loadPDF(bytes).use { doc ->

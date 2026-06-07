@@ -2,6 +2,7 @@ package br.com.finflow.investment.model
 
 import br.com.finflow.auth.model.User
 import br.com.finflow.document.model.Document
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import java.math.BigDecimal
 import java.time.Instant
@@ -16,10 +17,12 @@ data class InvestmentProduct(
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID = UUID.randomUUID(),
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     val user: User,
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id")
     val document: Document? = null,
